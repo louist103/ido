@@ -112,7 +112,10 @@ void _md_st_error(const char *format, ...) {
     exit(1);
 }
 
-char* _md_st_str_extiss(int index) {
+/* 
+0048A260 st_str_ifd_iss
+*/
+char *_md_st_str_extiss(int index) {
 
     if ((index >= 0) && (index < st_pchdr->cbssext)) {
         return &st_pchdr->pssext[index];
