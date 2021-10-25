@@ -4,6 +4,7 @@
 #include "uoptdata.h"
 #include "uoptutil.h"
 #include "uoptppss.h"
+#include "uoptfeedback.h"
 
 struct padded_string {
     size_t length;
@@ -22,11 +23,11 @@ void incorp_feedback(void) {
     int callee_count;
     int block;
     struct Proc **procs;
-    unsigned char *data;
+    char *data;
     struct f_per_proc *callee;
 
     fh = (struct f_header *)feedback;
-    data = feedback + sizeof (struct f_header);
+    data = (char*)(feedback + sizeof (struct f_header));
     f_argc = fh->argc;
     while (f_argc > 0) {
         data += (((struct padded_string *)data)->length & ~3) + sizeof(int);
@@ -39,7 +40,7 @@ void incorp_feedback(void) {
     proc_count = 0;
     do {
         procs[proc_count] = NULL;
-        block = path_blockno(&((struct padded_string *)data)->padded_name, ((struct padded_string *)data)->length);
+        block = path_blockno(data + 4, ((struct padded_string *)data)->length);
         if (block != -1) {
             procs[proc_count] = getproc(block);
         }
@@ -71,7 +72,7 @@ void incorp_feedback(void) {
         callee_count--;
     }
 
-    if (data != feedback_end) {
+    if (data != (char *)feedback_end) {
         write_string(err.c_file, "uopt: Internal error: Feedback file length doesn't match its structure.", 71, 71);
         writeln(err.c_file);
         fflush(err.c_file);
@@ -380,7 +381,11 @@ void controlflow() {
         if (curnode->interprocedural_controlflow) {
             visit_successors(curnode);
             // interproc_targets := GraphnodeList.create(curnode, interproc_targets);
-            new_list = new(sizeof(struct GraphnodeList), false);
+#ifdef AVOID_UB
+            new_list = alloc_new(sizeof (struct GraphnodeList), &perm_heap);
+#else
+            new_list = new(sizeof(struct GraphnodeList), false); // never freed
+#endif
             new_list->graphnode = curnode;
             new_list->next = interproc_targets;
             interproc_targets = new_list;

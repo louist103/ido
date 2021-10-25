@@ -247,7 +247,7 @@ union Valu {
   long long dwval;
 #endif
   struct {
-#ifdef _MIPSEL
+#ifdef LITTLE_ENDIAN
     int dwval_l, dwval_h;
 #else /* _MIPSEB */
     int dwval_h, dwval_l;
@@ -300,18 +300,34 @@ typedef unsigned char Uopcode;
 #endif
 
 struct Bcrec   {
+#ifdef LITTLE_ENDIAN
+          unsigned short Lexlev;
+          unsigned char  Dtype :5;
+          unsigned char  Mtype :3;
+          Uopcode Opc;
+#else
           Uopcode Opc;
           unsigned char  Mtype :3;
           unsigned char  Dtype :5;
           unsigned short  Lexlev;
+#endif
           int  I1;
           /* ------- 2 words ------- */
           union {
             struct {
+#ifdef LITTLE_ENDIAN
+              unsigned :24; enum Datatype Dtype2:8;
+#else
               enum Datatype Dtype2:8; unsigned :24;
+#endif
             }secondty;
             struct {
+#ifdef LITTLE_ENDIAN
+               unsigned int pad :16;
+               unsigned int Push :8, Pop :8;
+#else
                unsigned int Pop :8, Push :8;
+#endif
                unsigned int Extrnal;
             }uent;
             struct {
@@ -329,7 +345,7 @@ struct Bcrec   {
                     } dwbnds;
 #endif
                   struct {
-#ifdef _MIPSEL
+#ifdef LITTLE_ENDIAN
                     int lbound_l, lbound_h;
                     int hbound_l, hbound_h;
 #else        /* _MIPSEB */
@@ -419,16 +435,16 @@ struct utabrec {
 };
 
 enum mtagtype {
-    mtag_anything,              /* can dereference anything */
-    mtag_heap,                  /* only dereference heap memory */
-    mtag_readonly,              /* only dereference readonly memory */
-    mtag_non_local,             /* only dereference non-local memory */
-    mtag_local_stack,           /* only dereference local M memory */
-    mtag_uplevel_stack,         /* only dereference up-level M memory */
-    mtag_local_static,          /* only dereference FSYM symbols */
-    mtag_global_static,         /* only dereference non-FSYM static symbols */
-    mtag_f77_parm,              /* based on a specific f77 parameter */
-    mtag_vreg                   /* only emitted by ugen */
+    /* 0 */ mtag_anything,              /* can dereference anything */
+    /* 1 */ mtag_heap,                  /* only dereference heap memory */
+    /* 2 */ mtag_readonly,              /* only dereference readonly memory */
+    /* 3 */ mtag_non_local,             /* only dereference non-local memory */
+    /* 4 */ mtag_local_stack,           /* only dereference local M memory */
+    /* 5 */ mtag_uplevel_stack,         /* only dereference up-level M memory */
+    /* 6 */ mtag_local_static,          /* only dereference FSYM symbols */
+    /* 7 */ mtag_global_static,         /* only dereference non-FSYM static symbols */
+    /* 8 */ mtag_f77_parm,              /* based on a specific f77 parameter */
+    /* 9 */ mtag_vreg                   /* only emitted by ugen */
 };
 
 #endif

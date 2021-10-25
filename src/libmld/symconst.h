@@ -51,7 +51,7 @@ extern "C" {
 #define langAda		6
 #define langPl1		7
 #define langCobol	8
-#ifdef __sgi
+#if 1//def __sgi
 #define langStdc	langC
 #define langCplusplus   9
 #define langCplusplusV2 10
@@ -141,7 +141,7 @@ extern "C" {
 #define stTempProc      24	/* template function */
 #define stDefArg	25	/* default argument */
 
-#ifdef __sgi
+#if 1//def __sgi
 #define stStruct        26      /* begin Struct kind of stBlock */
 #define stUnion         27      /* begin Union kind of stBlock */
 #define stEnum          28      /* begin Enum  kind of stBlock */
